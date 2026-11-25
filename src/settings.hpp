@@ -18,6 +18,9 @@ struct Settings {
     bool esp_head_dot = false;
     bool esp_box_fill = false;
     bool esp_visible_only = false;
+    bool esp_bone_debug = false;          // draws every readable bone with its index
+    bool esp_bone_debug_nearest = true;   // only the entity nearest the crosshair
+    int esp_bone_debug_index = -1;        // -1 = highlight nothing
     bool esp_show_world_distance = false;
     int esp_max_distance_px = 0;          // 0 = no screen-distance cull
     float esp_max_world_distance = 0.0f;  // 0 = no world-distance cull

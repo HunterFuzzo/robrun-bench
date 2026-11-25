@@ -11,7 +11,7 @@ namespace rr::ui {
 namespace {
 
 constexpr float kPanelWidth = 430.0f;
-constexpr float kPanelHeight = 420.0f;
+constexpr float kPanelHeight = 478.0f;
 constexpr float kTitleHeight = 26.0f;
 constexpr float kTabHeight = 24.0f;
 constexpr float kPad = 12.0f;
@@ -238,6 +238,9 @@ void draw_esp_tab(Builder& ui, rr::cfg::Settings& s) {
                 rr::off::kCanWorldDistance);
     ui.checkbox("team check", s.esp_team_check);
     ui.checkbox("visible only", s.esp_visible_only, rr::off::kCanVisibilityFilter);
+    ui.checkbox("bone index debug", s.esp_bone_debug, rr::off::kHasBones);
+    ui.checkbox("debug nearest only", s.esp_bone_debug_nearest, rr::off::kHasBones);
+    ui.slider_int("highlight index (-1 off)", s.esp_bone_debug_index, -1, 255);
     ui.slider_int("screen cull px (0 = off)", s.esp_max_distance_px, 0, 2000);
     ui.slider_float("world cull (0 = off)", s.esp_max_world_distance, 0.0f, 10000.0f, 0);
 }
@@ -284,8 +287,9 @@ void draw_config_tab(Builder& ui, MenuState& state, const MenuInfo& info) {
     ui.label(info.target_line, kWhite);
     ui.label(info.build_line, kWarn);
     char line[160]{};
-    std::snprintf(line, sizeof(line), "entities %zu  dropped %zu  fps %.0f",
-                  info.entity_count, info.rejected, static_cast<double>(info.fps));
+    std::snprintf(line, sizeof(line), "entities %zu  dropped %zu  bones %zu  fps %.0f",
+                  info.entity_count, info.rejected, info.bones_per_entity,
+                  static_cast<double>(info.fps));
     ui.label(line, kGrey);
     ui.gap(4.0f);
 

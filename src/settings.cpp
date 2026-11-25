@@ -36,6 +36,8 @@ constexpr BoolField kBools[] = {
     {"esp_head_dot", &Settings::esp_head_dot},
     {"esp_box_fill", &Settings::esp_box_fill},
     {"esp_visible_only", &Settings::esp_visible_only},
+    {"esp_bone_debug", &Settings::esp_bone_debug},
+    {"esp_bone_debug_nearest", &Settings::esp_bone_debug_nearest},
     {"esp_show_world_distance", &Settings::esp_show_world_distance},
     {"aim_enabled", &Settings::aim_enabled},
     {"aim_team_check", &Settings::aim_team_check},
@@ -51,6 +53,7 @@ constexpr BoolField kBools[] = {
 
 constexpr IntField kInts[] = {
     {"esp_max_distance_px", &Settings::esp_max_distance_px},
+    {"esp_bone_debug_index", &Settings::esp_bone_debug_index},
     {"aim_key", &Settings::aim_key},
     {"aim_hitbox", &Settings::aim_hitbox},
     {"aim_fov_px", &Settings::aim_fov_px},

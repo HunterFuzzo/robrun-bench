@@ -35,6 +35,7 @@ struct MenuInfo {
     float fps = 0.0f;
     std::size_t entity_count = 0;
     std::size_t rejected = 0;
+    std::size_t bones_per_entity = 0;     // slots read on the first entity that has any
 };
 
 // Draws the menu when state.open is true. Consumes the clicks it handles.

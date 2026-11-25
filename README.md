@@ -34,7 +34,7 @@ feature reports itself as gated off, with the reason, in the CONFIG tab.
 | `src/world.*` | builds the snapshot, rejects implausible reads |
 | `src/overlay.*` | layered window, GDI back buffer, draw helpers |
 | `src/menu.*` | immediate-mode tabbed menu |
-| `src/esp.*` | box, skeleton, health, names, snaplines, distance |
+| `src/esp.*` | box, skeleton, health, names, snaplines, distance, bone index debug |
 | `src/aim.*` | hitbox selection, sticky target, smoothing, triggerbot |
 | `src/input.*` | polled keys, `SendInput` output |
 | `src/settings.*` | runtime toggles and their JSON persistence |
@@ -80,8 +80,13 @@ modelled: the point aimed at is where the client last drew the entity.
    and the gap between entries is the stride.
 5. The view matrix from the renderer's constant upload, or by brute-forcing
    16-float candidates until the local player projects to screen centre.
-6. Bone entries by stride and translation offset inside the entry; indices by
-   moving them until the drawing lines up.
+6. Bone entries by stride and translation offset inside the entry. For the
+   indices, switch on `bone index debug` in the ESP tab: every readable bone is
+   drawn as a dot with its index beside it, restricted to the entity nearest the
+   crosshair so the numbers stay readable, and the highlight slider lights one
+   index up at a time. A gap in the numbers is a finding on its own — that slot
+   is outside the array, or the stride is wrong. The `bones` counter in the
+   CONFIG tab reports how many slots were actually read.
 
 Module-relative values are RVAs. A value confirmed on one build is a hypothesis
 on the next, which is why `pe_timestamp` and `pe_checksum` are in the probe

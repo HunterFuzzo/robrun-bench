@@ -191,6 +191,13 @@ int main(int argc, char** argv) {
         world.snapshot(snapshot);
         info.entity_count = snapshot.entities.size();
         info.rejected = snapshot.rejected;
+        info.bones_per_entity = 0;
+        for (const auto& entity : snapshot.entities) {
+            if (!entity.bones.empty()) {
+                info.bones_per_entity = entity.bones.size();
+                break;
+            }
+        }
 
         overlay.begin_frame();
         if (visible) {

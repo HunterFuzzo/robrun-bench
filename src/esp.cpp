@@ -1,5 +1,6 @@
 #include "esp.hpp"
 
+#include <cstdint>
 #include <cstdio>
 #include <string>
 
@@ -19,6 +20,49 @@ bool project(const rr::game::Snapshot& snap, const rr::math::Vec3& world, float 
              float screen_h, rr::math::Vec2& out) {
     return rr::math::world_to_screen(snap.view, rr::off::kMatrixRowMajor, world, screen_w,
                                      screen_h, out);
+}
+
+// Address of the eligible entity whose feet point sits closest to the crosshair,
+// or 0 when nothing projects. Used to keep the index labels readable.
+std::uint64_t nearest_entity(const rr::game::Snapshot& snap,
+                             const rr::aimlogic::Filter& filter, float player_height,
+                             float screen_w, float screen_h,
+                             const rr::math::Vec2& crosshair) {
+    std::uint64_t best = 0;
+    float best_distance = 0.0f;
+    for (const auto& ent : snap.entities) {
+        if (!rr::aimlogic::eligible(ent, snap.local, snap.has_local, filter)) continue;
+        const rr::math::Vec3 feet_world =
+            rr::off::kPositionIsFeet
+                ? ent.position
+                : rr::game::raise(ent.position, -player_height * 0.5f);
+        rr::math::Vec2 feet;
+        if (!project(snap, feet_world, screen_w, screen_h, feet)) continue;
+        const float distance = rr::math::screen_distance(feet, crosshair);
+        if (best == 0 || distance < best_distance) {
+            best = ent.address;
+            best_distance = distance;
+        }
+    }
+    return best;
+}
+
+// Every readable bone as a dot with its index beside it. A slot that failed to
+// read is non-finite and is skipped, so a gap in the numbers is itself the
+// finding: that slot is outside the array, or the stride is wrong.
+void draw_bone_indices(rr::ui::Overlay& overlay, const rr::game::Snapshot& snap,
+                       const rr::game::Entity& ent, float screen_w, float screen_h,
+                       int highlight) {
+    for (std::size_t i = 0; i < ent.bones.size(); ++i) {
+        const rr::math::Vec3& bone = ent.bones[i];
+        if (!rr::math::plausible_world(bone)) continue;
+        rr::math::Vec2 dot;
+        if (!project(snap, bone, screen_w, screen_h, dot)) continue;
+        const bool lit = highlight >= 0 && static_cast<std::size_t>(highlight) == i;
+        const COLORREF colour = lit ? rr::ui::kAccent : rr::ui::kWarn;
+        overlay.filled_circle(dot.x, dot.y, lit ? 4.0f : 2.0f, colour);
+        overlay.text(dot.x + 6.0f, dot.y - 7.0f, std::to_string(i), colour);
+    }
 }
 
 void draw_skeleton(rr::ui::Overlay& overlay, const rr::game::Snapshot& snap,
@@ -53,6 +97,12 @@ void draw_esp(rr::ui::Overlay& overlay, const rr::game::Snapshot& snap,
     filter.team_check = settings.esp_team_check;
     filter.visible_only = settings.esp_visible_only;
     filter.max_world_distance = settings.esp_max_world_distance;
+
+    const std::uint64_t debug_address =
+        (settings.esp_bone_debug && settings.esp_bone_debug_nearest)
+            ? nearest_entity(snap, filter, settings.player_height, screen_w, screen_h,
+                             centre)
+            : 0;
 
     for (const auto& ent : snap.entities) {
         if (!rr::aimlogic::eligible(ent, snap.local, snap.has_local, filter)) continue;
@@ -100,6 +150,12 @@ void draw_esp(rr::ui::Overlay& overlay, const rr::game::Snapshot& snap,
 
         if (settings.esp_skeleton) {
             draw_skeleton(overlay, snap, ent, screen_w, screen_h, colour);
+        }
+
+        if (settings.esp_bone_debug &&
+            (!settings.esp_bone_debug_nearest || ent.address == debug_address)) {
+            draw_bone_indices(overlay, snap, ent, screen_w, screen_h,
+                              settings.esp_bone_debug_index);
         }
 
         if (settings.esp_head_dot) {
