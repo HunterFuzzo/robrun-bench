@@ -46,6 +46,27 @@ feature reports itself as gated off, with the reason, in the CONFIG tab.
 
 Windows, x64, C++20, MSVC. No external dependencies: Windows SDK and GDI only.
 
+Prerequisites, once:
+
+```
+winget install Kitware.CMake
+winget install Microsoft.VisualStudio.2022.BuildTools --override "--quiet --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended"
+```
+
+Then, from the repository root:
+
+```
+build.bat                 configure, build Release, run the tests
+probe.bat robrun.exe      identify the build, write robrun_probe.json
+run.bat robrun.exe        attach and draw
+```
+
+`build.bat` reports where the two binaries landed. Rerun it after every edit to
+`src/offsets.hpp`: the offsets are compile-time constants, so a changed value
+only takes effect once rebuilt.
+
+The equivalent by hand:
+
 ```
 cmake -S . -B build -A x64
 cmake --build build --config Release
