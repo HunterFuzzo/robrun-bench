@@ -7,6 +7,16 @@ Nothing in this tree writes to the target process. The game handle is opened wit
 `PROCESS_QUERY_LIMITED_INFORMATION | PROCESS_VM_READ`, and the only output path is
 a relative `SendInput` mouse move.
 
+First run, step by step: see [SETUP.md](SETUP.md).
+
+## Verified state
+
+The pure halves are built and passing under `g++ 15.2.0` with `-Wall -Wextra`.
+All eleven Windows translation units cross-compile clean with the same warning
+set under `x86_64-w64-mingw32-g++ 13`, and both targets link into PE32+ x86-64
+binaries. Neither binary has been run against a game, and neither has been built
+with MSVC yet.
+
 ## State of the offsets
 
 Every build-dependent value lives in `src/offsets.hpp` and **all of them are

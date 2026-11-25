@@ -114,6 +114,9 @@ int main(int argc, char** argv) {
         std::printf("gated     %s\n", line.c_str());
     }
 
+    std::printf("note      windowed or borderless draws fine, exclusive fullscreen hides "
+                "the overlay\n");
+
     HWND target = rr::ui::find_window_for_pid(static_cast<DWORD>(world.pid()));
     if (target == nullptr) {
         std::printf("no visible window for that pid yet; waiting\n");
@@ -179,14 +182,17 @@ int main(int argc, char** argv) {
         if (target == nullptr || !IsWindow(target)) {
             target = rr::ui::find_window_for_pid(static_cast<DWORD>(world.pid()));
         }
+        // A minimised or zero-sized target cannot be followed; drawing a stale
+        // buffer over the desktop is worse than drawing nothing.
+        bool following = false;
         if (target != nullptr) {
-            overlay.follow(target);
+            following = overlay.follow(target);
         }
 
         const HWND foreground = GetForegroundWindow();
         const bool target_focused = (target != nullptr) && (foreground == target);
         const bool overlay_focused = foreground == overlay.hwnd();
-        const bool visible = target_focused || (menu.open && overlay_focused);
+        const bool visible = following && (target_focused || (menu.open && overlay_focused));
 
         world.snapshot(snapshot);
         info.entity_count = snapshot.entities.size();
